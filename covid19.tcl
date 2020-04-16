@@ -5,10 +5,10 @@
 ##                      ( T | C | L | S | C | R | I | P | T | S | . | N | E | T )                    ##
 ##                       \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/ \_/                     ##
 ##                                                                                                   ##
-##                                      ï¿½ BLaCkShaDoW Production ï¿½                    	             ##
+##                                      ® BLaCkShaDoW Production ®                    	             ##
 ##                                                                                                   ##
 ##                                              PRESENTS                                             ##
-##									                            ï¿½##
+##									                            ®##
 ############################################  Covid-19 TCL   ##########################################
 ##									                             ##
 ##  DESCRIPTION: 							                             ##
@@ -371,12 +371,6 @@ set corona(country_list) {
 "Papua New Guinea"
 "St. Vincent Grenadines"
 "Timor-Leste"
-"Europe"
-"North America"
-"Asia"
-"South America"
-"Africa"
-"Oceania"
 }
 
 ###############################################################################################################
@@ -426,8 +420,7 @@ proc corona:auto_check {data channels num} {
 	set total 0
 	set chan [lindex $channels $num]
 	set country [string toupper [channel get $chan covid-country]]
-#if {$country == ""} { set country $corona(country) }
-if {$country == ""} { set country [lindex $corona(country_list) [rand [llength $corona(country_list)]]] }
+if {$country == ""} { set country $corona(country) }
 if {[string tolower $country] != "global"} {
 	set find_continent [lsearch -nocase $corona(continent_list) $country]
 	set find_country [lsearch -nocase $corona(country_list) $country]
@@ -496,8 +489,7 @@ if {[lindex $channels $next_num] != ""} {
 ###
 proc corona:getdata {} {
 	set link "https://www.worldometers.info/coronavirus/"
-#	http::register https 443 [list ::tls::socket -autoservername true]
-	::http::register https 443 tls:socket
+	http::register https 443 [list ::tls::socket -autoservername true]
 	set ipq [http::config -useragent "lynx"]
 	set ipq [::http::geturl "$link" -timeout 5000] 
 	set status [::http::status $ipq]
@@ -509,12 +501,7 @@ if {$status != "ok"} {
 	::http::cleanup $ipq
 	return $data
 }
-proc tls:socket args {
-   set opts [lrange $args 0 end-2]
-   set host [lindex $args end-1]
-   set port [lindex $args end]
-   ::tls::socket -servername $host {*}$opts $host $port
-}
+
 ###
 proc corona:pub {nick host hand chan arg} {
 	global corona
@@ -924,14 +911,11 @@ set corona(version) "1.3.3"
 ###
 set corona(en.lang.1) "Invalid country specified or NO CASES"
 set corona(en.lang.2) "You exceded the number of commands. Please wait \002%msg.1%\002 seconds."
-#set corona(en.lang.3) "\002COVID-19\002 stats -- \002%msg.1%\002 -- Total Cases: \002%msg.2%\002 ; New Cases:          \037%msg.3%\037 ; Total Deaths:         \002%msg.4%\002 ; New Deaths:          \037%msg.5%\037 ; Recovered:                \002%msg.6%\002 ; Active Cases:          \037%msg.7%\037 ; Critical:                 \002%msg.8%\002 ; Total Cases/1M pop:           \002%msg.9%\002 ; Deaths/1M pop: \002%msg.10%\002 ; Total tests: \002%msg.11%\002 ; Tests/1M pop: \002%msg.12%\002 ; Last Updated: \002%msg.13%\002"
-set corona(en.lang.3) "\00303COVID-19 \00301Stats For \00313(\00310%msg.1%\00313)\00306. \00301Total Cases: \00307%msg.2%\00306. \00301New Cases: \00304%msg.3%\0036. \00301Total Deaths: \00307%msg.4%\00306. \00301New Deaths: \00304%msg.5%\00306. \00301Total Recovered: \00303%msg.6%\00306. \00301Active Cases: \00307%msg.7%\00306. \00301Serious Critical: \00313%msg.8%\00306. \00301Total Cases/1M pop: \00307%msg.9%\00306. \00301Deaths/1M pop: \00304%msg.10%\00306. \00301Total tests: \00307%msg.11%\00306. \00301Tests/1M pop: \00307%msg.12%\00306. \00301Last Updated: \00312%msg.13%\00306.\003"
-#set corona(en.lang.4) "(AUTO) \002COVID-19\002 stats -- \002%msg.1%\002 -- Total Cases: \002%msg.2%\002 ; New Cases: \037%msg.3%\037 ; Total Deaths: \002%msg.4%\002 ; New Deaths: \037%msg.5%\037 ; Recovered: \002%msg.6%\002 ; Active Cases: \037%msg.7%\037 ; Critical: \002%msg.8%\002 ; Total Cases/1M pop: \002%msg.9%\002 ; Deaths/1M pop: \002%msg.10%\002 ; Total tests: \002%msg.11%\002 ; Tests/1M pop: \002%msg.12%\002 ; Last Updated: \002%msg.13%\002"
-set corona(en.lang.4) "\00303COVID-19 \00301Stats For \00313(\00310%msg.1%\00313)\00306. \00301Total Cases: \00307%msg.2%\00306. \00301New Cases: \00304%msg.3%\0036. \00301Total Deaths: \00307%msg.4%\00306. \00301New Deaths: \00304%msg.5%\00306. \00301Total Recovered: \00303%msg.6%\00306. \00301Active Cases: \00307%msg.7%\00306. \00301Serious Critical: \00313%msg.8%\00306. \00301Total Cases/1M pop: \00307%msg.9%\00306. \00301Deaths/1M pop: \00304%msg.10%\00306. \00301Total tests: \00307%msg.11%\00306. \00301Tests/1M pop: \00307%msg.12%\00306. \00301Last Updated: \00312%msg.13%\00306.\003"
-#set corona(en.lang.5) "\002COVID-19\002 stats -- \002%msg.1%\002 -- Total Cases: \002%msg.2%\002 ; New Cases: \037%msg.3%\037 ; Total Deaths: \002%msg.4%\002 ; New Deaths: \037%msg.5%\037 ; Recovered: \002%msg.6%\002 ; Active Cases: \037%msg.7%\037 ; Critical: \002%msg.8%\002 ; Total Cases/1M pop: \002%msg.9%\002 ; Deaths/1M pop: \002%msg.10%\002 ; Last Updated: \002%msg.11%\002"
-set corona(en.lang.5) "\00303COVID-19 \00301Stats For \00313(\00310%msg.1%\00313)\00306. \00301Total Cases: \00307%msg.2%\00306. \00301New Cases: \00304%msg.3%\0036. \00301Total Deaths: \00307%msg.4%\00306. \00301New Deaths: \00304%msg.5%\00306. \00301Total Recovered: \00303%msg.6%\00306. \00301Active Cases: \00307%msg.7%\00306. \00301Serious Critical: \00313%msg.8%\00306. \00301Total Cases/1M pop: \00307%msg.9%\00306. \00301Deaths/1M pop: \00304%msg.10%\00306. \00301Last Updated: \00312%msg.11%\00306.\003"
-#set corona(en.lang.6) "(AUTO) \002COVID-19\002 stats -- \002%msg.1%\002 -- Total Cases: \002%msg.2%\002 ; New Cases: \037%msg.3%\037 ; Total Deaths: \002%msg.4%\002 ; New Deaths: \037%msg.5%\037 ; Recovered: \002%msg.6%\002 ; Active Cases: \037%msg.7%\037 ; Critical: \002%msg.8%\002 ; Total Cases/1M pop: \002%msg.9%\002 ; Deaths/1M pop: \002%msg.10%\002 ; Last Updated: \002%msg.11%\002"
-set corona(en.lang.6) "\00303COVID-19 \00301Stats For \00313(\00310%msg.1%\00313)\00306. \00301Total Cases: \00307%msg.2%\00306. \00301New Cases: \00304%msg.3%\0036. \00301Total Deaths: \00307%msg.4%\00306. \00301New Deaths: \00304%msg.5%\00306. \00301Total Recovered: \00303%msg.6%\00306. \00301Active Cases: \00307%msg.7%\00306. \00301Serious Critical: \00313%msg.8%\00306. \00301Total Cases/1M pop: \00307%msg.9%\00306. \00301Deaths/1M pop: \00304%msg.10%\00306. \00301Last Updated: \00312%msg.11%\00306.\003"
+set corona(en.lang.3) "\002COVID-19\002 stats -- \002%msg.1%\002 -- Total Cases: \002%msg.2%\002 ; New Cases: \037%msg.3%\037 ; Total Deaths: \002%msg.4%\002 ; New Deaths: \037%msg.5%\037 ; Recovered: \002%msg.6%\002 ; Active Cases: \037%msg.7%\037 ; Critical: \002%msg.8%\002 ; Total Cases/1M pop: \002%msg.9%\002 ; Deaths/1M pop: \002%msg.10%\002 ; Total tests: \002%msg.11%\002 ; Tests/1M pop: \002%msg.12%\002 ; Last Updated: \002%msg.13%\002"
+set corona(en.lang.4) "(AUTO) \002COVID-19\002 stats -- \002%msg.1%\002 -- Total Cases: \002%msg.2%\002 ; New Cases: \037%msg.3%\037 ; Total Deaths: \002%msg.4%\002 ; New Deaths: \037%msg.5%\037 ; Recovered: \002%msg.6%\002 ; Active Cases: \037%msg.7%\037 ; Critical: \002%msg.8%\002 ; Total Cases/1M pop: \002%msg.9%\002 ; Deaths/1M pop: \002%msg.10%\002 ; Total tests: \002%msg.11%\002 ; Tests/1M pop: \002%msg.12%\002 ; Last Updated: \002%msg.13%\002"
+set corona(en.lang.5) "\002COVID-19\002 stats -- \002%msg.1%\002 -- Total Cases: \002%msg.2%\002 ; New Cases: \037%msg.3%\037 ; Total Deaths: \002%msg.4%\002 ; New Deaths: \037%msg.5%\037 ; Recovered: \002%msg.6%\002 ; Active Cases: \037%msg.7%\037 ; Critical: \002%msg.8%\002 ; Total Cases/1M pop: \002%msg.9%\002 ; Deaths/1M pop: \002%msg.10%\002 ; Last Updated: \002%msg.11%\002"
+set corona(en.lang.6) "(AUTO) \002COVID-19\002 stats -- \002%msg.1%\002 -- Total Cases: \002%msg.2%\002 ; New Cases: \037%msg.3%\037 ; Total Deaths: \002%msg.4%\002 ; New Deaths: \037%msg.5%\037 ; Recovered: \002%msg.6%\002 ; Active Cases: \037%msg.7%\037 ; Critical: \002%msg.8%\002 ; Total Cases/1M pop: \002%msg.9%\002 ; Deaths/1M pop: \002%msg.10%\002 ; Last Updated: \002%msg.11%\002"
+
 
 
 set corona(ro.lang.1) "Tara invalida sau nu sunt cazuri."

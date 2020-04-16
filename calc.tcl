@@ -1,15 +1,31 @@
-bind pub - !hitung hitung
+# created by fedex
 
-set pi 3.1415926535897932
-set e 2.71828182845905
-set g 9.81
+bind pub - !calc safe_calc
+bind pub - .calc safe_calc
+setudef flag calc
 
-proc hitung {nick host handle channel arg} {
-  global pi e g
-  if {$arg != "" && ![string match "\[" $arg] && ![string match "\]" $arg]} { 
-    putserv "PRIVMSG $channel :[expr $arg]"
-  } else {
-    putserv "PRIVMSG $channel :15Cara\: !hitung 1+1 --- konstanta: \$pi \$e \$g --- fungsi: abs(), acos(), asin(), atan(), atan2(), ceil(), cos(), cosh(), exp(), floor(), fmod(), hypot(), log(), log10(), pow(), akar(), round(), sin(), sinh(), sqrt(), tan(), tanh() --- \[ dan \] tidak boleh dipakai dalam expresi."
-  }
+proc is_op {str} {
+	return [expr [lsearch {{ } . + - * / ( ) %} $str] != -1]
 }
 
+proc safe_calc {nick uhost hand chan str} {
+	if {![channel get $chan calc]} { return }
+
+	foreach char [split $str {}] {
+		if {![is_op $char] && ![string is integer $char]} {
+			putserv "PRIVMSG $chan :$nick: Invalid expression for calc."
+			return
+		}
+	}
+
+	# make all values floating point
+	set str [regsub -all -- {((?:\d+)?\.?\d+)} $str {[expr {\1*1.0}]}]
+	set str [subst $str]
+
+	if {[catch {expr $str} out]} {
+		putserv "PRIVMSG $chan :$nick: Invalid equation."
+		return
+	} else {
+		putserv "PRIVMSG $chan :$str = $out"
+	}
+}

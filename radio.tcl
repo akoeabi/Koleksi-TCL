@@ -2,8 +2,8 @@
 #                          shoutcast made by Javu @IRC.usuRadio.us             $
 #                         htt://www.usuRadio.us Home Page IRC Client           $
 ###############################################################################$
-set radiochans "#warganet"
-set streamip "185.121.170.16"
+set radiochans "#ukhuwah"
+set streamip "178.19.96.182"
 set streamport "8000"
 set streampass "djkoe"
 set scstatstrigger "!stats"

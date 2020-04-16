@@ -1,58 +1,53 @@
-# aidle.tcl v1.1 (28 March 1999) by slennox <slenny@ozemail.com.au>
-# Latest versions can be found at www.ozemail.com.au/~slenny/eggdrop/
-#
-# Basic anti-idle script, sends random msg's to the specified channel at
-# random time intervals.
-#
-# v1.0 - Initial release
-# v1.1 - Stremlined startup timer check, added +1 to utimer
+### Anti-Idle v1.2
+### by Progeny <progeny@azzurra.org>
+### irc.azzurra.org - #EggHelp
 
-# Channel to send anti-idle messages to
-set ai_chan "#baleshells"
+# - Using -
+# Type in partyline:
+# .chanset #channel maxidle <time in minutes>
+# If set 0 channel's check will be ignored.
 
-# Maximum time interval between messages (in minutes)
-set ai_time 5
+# Punishing method (1 = Kick, 2 = Kick/Ban)
+set pmethod 2
+# Ban time in minutes.
+set bantime 20
+# Kick's reason
+set aidlereason "Mohon tidak parkir nick di channel official Allnetwork. Channel ini khusus untuk bantuan dan bukan untuk parkir nick. idle :  20 minute - Tempban :  2  minute."
+# Exception's flags
+set flags n|n
+# Kick op? (0 = Yes, 1 = No)
+set kickop 1
+# Kick voice? (0 = Yes, 1 = No)
+set kickvoice 0
+#Check for idling users every minutes.
+bind time - * aidle:checkidle
 
-# Messages to send
-set ai_msgs {
-  "la la la, no idle man!!!"
-  "blah, no idle man!!!"
-  "bleh, no idle man!!!"
-  "eits.., no idle man!!!"
-  "hoi, no idle man!!!"
-  "woi, no idle man!!!"
-  "haha, no idle man!!!"
-  "hahahaha, no idle man!!!"
-  "heh, no idle man!!!"
-  "hehe, no idle man!!!"
-  "hehehe, no idle man!!!"
-  "hello, no idle man!!!"
-  "hi, no idle man!!!"
-  "hey, no idle man!!!"
-  "ic, no idle man!!!"
-  "bagh, no idle man!!!"
-  "kao, no idle man!!!"
+setudef int maxidle
+
+proc aidle:checkidle { min hour day month year } {
+global botnick flags kickop kickvoice
+	foreach chan [channels] {
+		if {![channel get $chan "maxidle"]} {continue}
+		foreach nick [chanlist $chan] {
+			if {$nick == $botnick} {continue}
+			if {([isop $nick $chan]) && ($kickop)} {continue}
+			if {([isvoice $nick $chan]) && ($kickvoice)} {continue}
+			if {[matchattr [nick2hand $nick] $flags] == 1} {continue}
+			if {[getchanidle $nick $chan] > [channel get $chan "maxidle"]} {
+			aidle:punish $chan $nick [channel get $chan "maxidle"]
+			}
+		}
+	
+	}
 }
 
-
-# Don't edit anything below unless you know what you're doing
-
-proc ai_start {} {
-  global ai_time
-  if {[string match *ai_sendmsg* [timers]]} {return 0}
-  timer [expr [rand $ai_time] + 1] ai_sendmsg
+proc aidle:punish { channel nick idletime } {
+global pmethod aidlereason bantime
+regsub -all "%idletime" $aidlereason $idletime aidlereason
+	switch $pmethod {
+	1 { putserv "KICK $channel $nick :$aidlereason" }
+	2 { newchanban $channel "*![getchanhost $nick]" "Anti-Idle" "Mohon tidak parkir nick di channel official Allnetwork. Channel ini khusus untuk bantuan dan bukan untuk parkir nick. idle :  %idletime minute - Tempban :  20  minute." $bantime }
+	}
 }
 
-proc ai_sendmsg {} {
-  global botnick ai_chan ai_msgs ai_time
-  if {[validchan $ai_chan] && [onchan $botnick $ai_chan]} {
-    puthelp "PRIVMSG $ai_chan :[lindex $ai_msgs [rand [llength $ai_msgs]]]"
-  }
-  timer [expr [rand $ai_time] + 1] ai_sendmsg
-}
-
-set ai_chan [string tolower $ai_chan]
-
-ai_start
-
-putlog "Loaded aidle.tcl v0.1 by HeRu"
+putlog "Anti-Idle v1.2 loaded"

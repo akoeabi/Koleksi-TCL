@@ -130,5 +130,3 @@ foreach bind [binds msg] {
     catch {unbind $type $flags $command $name}
   }
 }
-
-putlog "Script loaded: Whois by perpleXa"

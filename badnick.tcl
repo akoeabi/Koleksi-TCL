@@ -1,96 +1,140 @@
-#########################################
-# 			    						#
-# ReLease Date   : 30 Januari 2010  	#                 
-# 							   			#
-# DediCateD      : Ukhuwahnet@DALnet	#
-#                                   	#  
-#########################################
+#--------------------------------------------------------------------------------------#
+#                 BAD NICK SCRIPT BY RANA USMAN                                        #
+#--------------------------------------------------------------------------------------#
+########################################################################################
+#- Enter the Bad nicks Below on which you want your bot to BAN  (Wild Cards Supported)-#
+########################################################################################
+set bnick {
+  "peder" 
+  "*qifsh*" 
+  "*cifsh*" 
+  "*fuksa*" 
+  "*karin*" 
+  "*pidh*" 
+  "*pith*"
+  "*pajdh*"
+  "*pajth*"
+  "*nanqim*"
+  "*nancim*"
+  "*thith*"
+  "*cm"
+  "*_cm"
+}
+#########################################################################################################
+##                SET The channel on which you want this script to work                                ##
+## Channels Separted by space...and if you want this script to work on all channels leave it as ""     ##
+#########################################################################################################
 
-##############################################
-### Start configuring variables from here! ###
-############################################## 
+set bchan "#AlbaChat"
 
-# Configuration settings:
+################
+#- Set Reason -#
+################
 
-# Owner
-set bnowner "abah" 
+set kickreason "Nick i palejuar - Ndroni nickun tuaj /nick nick-tjeter dhe hyni perseri!"
 
-# Update
-set bnupdate "09.08.2010"
 
-# location
-set bncountry "Indonesia"
-set bnstate "Makassar"
+#--------------------------------------------------------------------------------------------------------------------#
+#   SCRIPT STARTS FROM HERE...MAKE IT BETTER WITH YOUR SKILLS IF YOU CAN.I DONT RESTRICT YOU TO NOT TO TOUCH CODE!   #
+#--------------------------------------------------------------------------------------------------------------------#
 
-# End configuration
 
-#Note: jika kamu ingin menambahkan daftar badnick/ident, cukup dengan copy paste sebuah perintah dibawah ini, misalnya copy: bind join - "*fuck*" join_badnick, lalu edit "*fuck*" dengan "*penis*"
+bind join - * join:RanaUsman
+proc join:RanaUsman {nick uhost hand chan} {
+global bnick bchan kickreason temp
+if {(([lsearch -exact [string tolower $bchan] [string tolower $chan]] != -1)  || ($bchan == ""))} {
+  set temp 0
+	foreach i [string tolower $bnick] {
+	if {[string match *$i* [string tolower $nick]]} {
+	set temp 1
+ 	}
+ 	}
+}
+	if {!$temp} { return } {
+putquick "MODE $chan +b $nick"
+putquick "KICK $chan $nick :$kickreason"
+ } 
+}
+putlog "=-\002 Loaded Bad Nick by DeviL (www.zemra.org)\002 -="
 
-bind join - "*fuck*" join_badnick
-bind join - "*asshole*" join_badnick
-bind join - "*mani*" join_badnick
-bind join - "*contol*" join_badnick
-bind join - "*pepek*" join_badnick
-bind join - "*kentot*" join_badnick
-bind join - "*jembut*" join_badnick
-bind join - "*zembut*" join_badnick
-bind join - "*pantat*" join_badnick
-bind join - "*suck*" join_badnick
-bind join - "*tetek*" join_badnick
-bind join - "*pukimak*" join_badnick
-bind join - "*damn*" join_badnick
-bind join - "*cibai*" join_badnick 
-bind join - "*bitch*" join_badnick 
-bind join - "*kimak*" join_badnick 
-bind join - "*memek*" join_badnick 
-bind join - "*kontol*" join_badnick 
-bind join - "*kanjut*" join_badnick 
-bind join - "*bangsat*" join_badnick 
-bind join - "*ngentot*" join_badnick 
-bind join - "*peler*" join_badnick 
-bind join - "*lanciau*" join_badnick 
-bind join - "*bajingan*" join_badnick 
-bind join - "*vagina*" join_badnick 
-bind join - "*ngewe*" join_badnick 
-bind join - "*shit*" join_badnick 
-bind join - "*anjing*" join_badnick
-bind join - "*babi*" join_badnick
-bind join - "*kampang*" join_badnick 
-bind join - "*toket*" join_badnick 
-bind join - "*stoket*" join_badnick 
-bind join - "*homo*" join_badnick 
-bind join - "*puting*" join_badnick 
-bind join - "*penis*" join_badnick 
-bind join - "*telaso*" join_badnick 
-bind join - "*sundala*" join_badnick 
-bind join - "*setang*" join_badnick 
-bind join - "*horny*" join_badnick 
-bind join - "*payudara*" join_badnick 
-bind join - "*orgasme*" join_badnick 
-bind join - "*titit*" join_badnick 
-bind join - "*nenen*" join_badnick 
-bind join - "*seks*" join_badnick 
-bind join - "*sex*" join_badnick 
-bind join - "*birahi*" join_badnick 
-bind join - "*klitoris*" join_badnick 
-bind join - "*klentit*" join_badnick 
-bind join - "*onani*" join_badnick 
-bind join - "*konak*" join_badnick 
-bind join - "*mastrubasi*" join_badnick
-bind join - "*masturbasi*" join_badnick
-bind join - "*sperma*" join_badnick
+#########################################################################
+#  	       	  Bad Ident Kicker Script v1.65.b 	            	#
+#								                        # 
+#							  	                        #
+# Author: awyeah					                31st May 2004 #
+# Email: awyeah@usa.net				         Build version 1.65.b #
+# Copyright © 2004 awyeah All Rights Reserved	 http://www.awyeah.org/ #
+#########################################################################
+##################################################
+### Start editing variables from here onwards! ###
+##################################################
 
-proc join_badnick {nick host hand chan} {
-putlog "$nick $hand $chan $host"
-global join_badnick channel botnick Name 
-if {$hand != ""} {
-set host "*!*[string trimleft [maskhost [getchanhost $nick]] !*]"
-set Reason "1RuLes: 4No Bad Nick join_badnick or Ident!! (detected on 4$nick (7$host)"
-putserv "KICK $chan $nick :$Reason"
-newchanban $chan $nick Banned $Reason 10
-return 0
-}}
+#Set the channel(s) you want this script active on.
+#This script supports multiple channels.
+#Usage: "#channel1 #channel2 #mychannel"
+#(To activate on all channels use: "")
+set badidentchans "#albachat"
 
-putlog "TCL Name : TCL Badnick edited by $bnowner $bncountry $bnstate $bnupdate"
-putlog "Mailto : abah@ukhuwah.net"
-putlog "Loaded Status : Success ...!!!"
+#Set the *bad words* for the script to react on. 
+#When users join a channel this script is activated 
+#and their idents match this current world list, 
+#they will be kicked/banned. (wildcards "*" are accepted)
+#(Set/edit these words according to your needs)
+#(I have already added some as examples)
+set badidents {
+  "peder" 
+  "*qifsh*" 
+  "*cifsh*" 
+  "*fuksa*" 
+  "*karin*" 
+  "*pidh*" 
+  "*pith*"
+  "*pajdh*"
+  "*pajth*"
+  "*nanqim*"
+  "*nancim*"
+  "*thith*"
+}
+
+
+#Set the flags for bot owners, masters, ops
+#and users which to exempt from the script.
+#(Usage: m, n, o, or "mnf", "fbo" etc)
+set badidentexempt "mnof|mnof"
+
+#For how long you wish (in minutes) to ban the 
+#user with the bad ident. (mins)
+set badidbantime 30
+
+
+###############################################################################
+### Don't edit anything else from this point onwards, even if you know tcl! ###
+###############################################################################
+
+bind join - * join:badident
+
+proc join:badident {nick host hand chan} {
+ global botnick badidents badidentchans badidentexempt badidbantime
+  if {(([lsearch -exact [string tolower $badidentchans] [string tolower $chan]] != -1) || ($badidentchans == "*")) && ($nick != $botnick)} {
+    foreach badident [string tolower $badidents] {
+     set badidentban1 "*!*$badident*@*"
+     set badidentban2 "*!*@[lindex [split $host @] 1]"
+     set userident "[string trimleft [string tolower [lindex [split $host "@"] 0]] "~"]"
+    if {[string match *$badident* [string tolower $userident]]} {
+      if {([botisop $chan]) && (![isop $nick $chan]) && (![isvoice $nick $chan]) && (![matchattr $hand $badidentexempt $chan]) && ([onchan $nick $chan])} {
+	  putquick "MODE $chan -o+bb $nick $badidentban1 $badidentban2"
+        putquick "KICK $chan $nick :Ident i palejuar - Ju lutem ndroni IDENTIN tuaj dhe hyni perseri."
+        timer $badidbantime "pushmode $chan -b $badidentban2"
+        return 0
+        }
+      }
+    }
+  }
+}
+# (ain't i an asskicker?...)
+
+
+putlog "Bad Ident Kicker Script by \002DeviL\002 -=Loaded=-"
+putlog "*ENABLED* Bad Ident Kicker Script on:\002 $badidentchans"
+
+return

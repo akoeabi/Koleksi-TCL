@@ -1,21 +1,46 @@
-#####################################################
-# - add voice on pubmsg for #channel :              #
-#   .chanset #channel +av.pubmsg                    #
-#   remove with .chanset #channel -av.pubmsg        #
-# - add devoice after idle time for #channel :      #
-#   .chanset #channel +av.devoice                   #
-# - optionally set devoice time in the bots :       #
-#   .chanset #channel av.dtime 30 (in minutes)      #
-#####################################################
+############################## _\|/_ ###############################
+##
+## autovoice on pubmsg script v1.2
+## by aerosoul@IRCNet (soul@gmx.net)
+##
+## this script will give voice to users who say something on the
+## channel and devoice them after idle time.
+##
+## people will have a overlook of who idles and who is active on your
+## channels (especially for chans with bot-only ops)
+##
+## - add voice on pubmsg for #channel :
+##   .chanset #channel +av.pubmsg
+##   remove with .chanset #channel -av.pubmsg
+## - add devoice after idle time for #channel :
+##   .chanset #channel +av.devoice
+## - optionally set devoice time in the bots partyline :
+##   .chanset #channel av.dtime 30 (in minutes)
+##
+## there is a little delay before voicing, so there won't be
+## modefloods.
+##
+## tell me bugs and suggestions @ IRCNet #playaz or soul@gmx.net
+## (no, I don't write a version for older eggys, sorry.)
+## if you want to send me ganja, please leave a msg ;)
+##
+## v1.2 28. may 2001:   - added option to set devoice time @ partyline
+##                      - fixed some stuff / cleaned up
+##                      - removed responding to stupid "thank you, bot"
+##                        scripts
+##                      - the script now also voices @'s. makes more
+##                        sense =)
+##
+############################## _\|/_ ###############################
 
 # set the channels for this script in partyline (see above)
 
-# default: devoice after 5 mins 
+# default: devoice after 23 mins
 # optionally you can set this in the bots partyline
-set av_dtime 5
+set av_dtime 30
 
 # users with flag +g or +2 or bots won't be devoiced
-set av_nodevoiceflag "fv"
+set av_nodevoiceflag "2gb"
 
 # users with flag +1 won't be voiced
 # set to "1b" if you don't want bots to be voiced, too
@@ -25,14 +50,18 @@ set av_novoiceflag "1"
 set av_partylog 0
 
 # delay before autovoicing, in seconds (will be randomized)
-set av_delay 30
+set av_delay 120
 
 # also give voice to ops? (0/1)
 set av_opvoice 0
 
-#####################################################
-#Tolong Jangan Di Edit Bagian Bawah ini
-#####################################################
+# also give voice to half ops? (0/1)
+set av_halfopvoice 0
+############################## _\|/_ ###############################
+
+# # # # # # # # # # don't edit below this line # # # # # # # # # # #
+# # # # # # # # if you don't know what you're doing  # # # # # # # #
+
 if {$numversion < "1050000"} {
  putlog "you need eggdrop version >1.5 for autovoice on pubmsg script to work"
  return 0
@@ -42,29 +71,29 @@ setudef flag av.pubmsg
 setudef flag av.devoice
 setudef int av.dtime
 
-proc av_main {nik uhost hand chan text} { 
+proc av_main {nik uhost hand chan text} {
  global av_delay av_novoiceflag
 
- set delay [expr 1 + [rand $av_delay]] 
+ set delay [expr 1 + [rand $av_delay]]
 
  if {![string match *av_devoice* [timers]]} {timer [expr 3 + [rand 5]] av_devoice}
- set chan [string tolower $chan] 
+ set chan [string tolower $chan]
  if {[av_fcheck $chan] == 0} {return 0}
- if {[matchattr $hand $av_novoiceflag] || [matchattr $hand |$av_novoiceflag $chan]} { 
-	return 0
+ if {[matchattr $hand $av_novoiceflag] || [matchattr $hand |$av_novoiceflag $chan]} {
+        return 0
  }
- if {![isvoice $nik $chan]} { 
-	utimer $delay [split "av_doit $chan $nik"] 
+ if {![isvoice $nik $chan]} {
+        utimer $delay [split "av_doit $chan $nik"]
  }
 }
 
-proc av_doit {vchan vnick} { 
-global av_opvoice
+proc av_doit {vchan vnick} {
+global av_opvoice av_halfopvoice
  if {![isvoice $vnick $vchan]} {
-  if {($av_opvoice == 0) && [isop $vnick $vchan]} { return 0 }
-  pushmode $vchan +v $vnick 
- } 
-} 
+  if {($av_opvoice == 0) && [isop $vnick $vchan] && ($av_halfopvoice == 0) && [ishalfop $vnick $vchan]} { return 0 }
+  pushmode $vchan +v $vnick
+ }
+}
 
 proc av_devoice {} {
 global av_dtime av_nodevoiceflag av_partylog
@@ -79,17 +108,17 @@ if {![string match *av_devoice* [timers]]} {timer [expr 1 + [rand 3]] av_devoice
    foreach user [chanlist $chan] {
     set hand [nick2hand $user]
     if {[matchattr $hand $av_nodevoiceflag] || [matchattr $hand |$av_nodevoiceflag $chan]} {
-	continue
+        continue
     }
     if {([getchanidle $user $chan] > $dtime) && [isvoice $user $chan]} {
-	pushmode $chan -v $user
-	set av_deoplist "$av_deoplist $user"
+        pushmode $chan -v $user
+        set av_deoplist "$av_deoplist $user"
     }
    }
    if {$av_partylog == 1} {
     set count 0
     foreach u $av_deoplist {
-	set count [expr $count + 1]
+        set count [expr $count + 1]
     }
     if {($count != 0)} {
      putlog "-\[ av.pubmsg \]- devoicing $count users in $chan: $av_deoplist"
@@ -137,10 +166,16 @@ set autovoice_chans ""
 
 foreach chan [channels] {
  if {[av_fcheck $chan] == 1} {
-	set autovoice_chans "$autovoice_chans $chan"
+        set autovoice_chans "$autovoice_chans $chan"
  }
 }
 
 if {![string match *av_devoice* [timers]]} {timer [expr 3 + [rand 5]] av_devoice}
 
 bind pubm - * av_main
+
+############################## _\|/_ ###############################
+
+putlog "-\[ voice on pubmsg script v1.2 by aerosoul active on: $autovoice_chans \]-"
+
+############################ legalize! #############################

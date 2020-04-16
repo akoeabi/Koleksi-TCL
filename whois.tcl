@@ -1,121 +1,100 @@
-#########################################
-# 			    						#
-# ReLease Date   : 30 Januari 2010  	#                 
-# 							   			#
-# DediCateD      : Ukhuwahnet@DALnet	#
-#                                   	#  
-#########################################
-
-##############################################
-### Start configuring variables from here! ###
-############################################## 
-
-# Configuration settings:
-
-# Owner
-set whois(owner) "abah" 
-
-# location
-set whois(country) "Indonesia"
-set whois(state) "Makassar"
-
-# Update
-set whois(update) "09.08.2010"
-
-# Version
-set whois(version) "20.10"
-
-# Config:
-# What is the minimum access someone needs to perform a whois with the bot?
-# o = global op, m = global master, n = global owner
-# |o = channel op, |m = channel master, |n = channel owner
-set whois(acc) ""
-	
-# End configuration
-	
-bind pub $whois(acc) "!whois" whois:nick
-
-proc whois:nick { nickname hostname handle channel arguments } {
-global whois
-    set target [lindex [split $arguments] 0]
-if {$target == ""} {
-
-return 0
+##############################################################################################
+##  ##     whois.tcl for eggdrop by Ford_Lawnmower irc.geekshed.net #Script-Help        ##  ##
+##############################################################################################
+## To use this script you must set channel flag +whois (ie .chanset #chan +whois)           ##
+##############################################################################################
+##      ____                __                 ###########################################  ##
+##     / __/___ _ ___ _ ___/ /____ ___   ___   ###########################################  ##
+##    / _/ / _ `// _ `// _  // __// _ \ / _ \  ###########################################  ##
+##   /___/ \_, / \_, / \_,_//_/   \___// .__/  ###########################################  ##
+##        /___/ /___/                 /_/      ###########################################  ##
+##                                             ###########################################  ##
+##############################################################################################
+##  ##                             Start Setup.                                         ##  ##
+##############################################################################################
+namespace eval whois {
+## change cmdchar to the trigger you want to use                                        ##  ##
+  variable cmdchar "!"
+## change command to the word trigger you would like to use.                            ##  ##
+## Keep in mind, This will also change the .chanset +/-command                          ##  ##
+  variable command "whois"
+## change textf to the colors you want for the text.                                    ##  ##
+  variable textf "\017\00304"
+## change tagf to the colors you want for tags:                                         ##  ##  
+  variable tagf "\017\002"
+## Change logo to the logo you want at the start of the line.                           ##  ##  
+  variable logo "\017\00304\002\[\00306W\003hois\00304\]\017"
+## Change lineout to the results you want. Valid results are channel users modes topic  ##  ##
+  variable lineout "channel users modes topic"
+##############################################################################################
+##  ##                           End Setup.                                              ## ##
+##############################################################################################  
+  variable channel ""
+  setudef flag $whois::command
+  bind pub -|- [string trimleft $whois::cmdchar]${whois::command} whois::list
+  bind raw -|- "311" whois::311
+  bind raw -|- "312" whois::312
+  bind raw -|- "319" whois::319
+  bind raw -|- "317" whois::317
+  bind raw -|- "313" whois::multi
+  bind raw -|- "310" whois::multi
+  bind raw -|- "335" whois::multi
+  bind raw -|- "301" whois::301
+  bind raw -|- "671" whois::multi
+  bind raw -|- "320" whois::multi
+  bind raw -|- "401" whois::multi
+  bind raw -|- "318" whois::318
+  bind raw -|- "307" whois::307
 }
-	
-# if {[string length $target] >= "14"} {
-# putquick "PRIVMSG $channel :Maaf, Karakter terlalu panjang kalau bisa kurang dari 14 characters."; return
-# }
-# if {[regexp -all -- {[~\[\]\{\}\|\_\\]} $target]} {
-# putquick "PRIVMSG $channel :Maaf, Kayla nggak menemukannya."; return
-# }
-putquick "WHOIS $target $target"
-    set ::whoischannel $channel
-	set ::whoistarget $target
-bind RAW - 401 whois:nosuch
-bind RAW - 311 whois:info
-bind RAW - 319 whois:channels
-bind RAW - 301 whois:away
-bind RAW - 313 whois:ircop
-bind RAW - 330 whois:auth
-bind RAW - 317 whois:idle
+proc whois::311 {from key text} {
+  if {[regexp -- {^[^\s]+\s(.+?)\s(.+?)\s(.+?)\s\*\s\:(.+)$} $text wholematch nick ident host realname]} {
+    putserv "PRIVMSG $whois::channel :${whois::logo} ${whois::tagf}Host:${whois::textf} \
+    $nick \(${ident}@${host}\) ${whois::tagf}Realname:${whois::textf} $realname"
+  }
 }
-
-proc whois:putmsg { channel arguments } {
-putquick "PRIVMSG $channel :$arguments"
+proc whois::multi {from key text} {
+  if {[regexp {\:(.*)$} $text match $key]} {
+    putserv "PRIVMSG $whois::channel :${whois::logo} ${whois::tagf}Note:${whois::textf} [subst $$key]"
+    return 1
+  }
 }
-
-proc whois:info { from keyword arguments } {
-	set channel $::whoischannel
-	set nickname [lindex [split $arguments] 1]
-	set ident [lindex [split $arguments] 2]
-	set host [lindex [split $arguments] 3]
-	set realname [string range [join [lrange $arguments 5 end]] 1 end]
-	whois:putmsg $channel "$nickname - $ident@$host * $realname"
-	unbind RAW - 311 whois:info
+proc whois::312 {from key text} {
+  regexp {([^\s]+)\s\:} $text match server
+  putserv "PRIVMSG $whois::channel :${whois::logo} ${whois::tagf}Server:${whois::textf} $server"
 }
-
-proc whois:ircop { from keyword arguments } {
-	set channel $::whoischannel
-	set target $::whoistarget
-	whois:putmsg $channel "$target is an IRC Operator"
-	unbind RAW - 313 whois:ircop
+proc whois::319 {from key text} {
+  if {[regexp {.+\:(.+)$} $text match channels]} {
+    putserv "PRIVMSG $whois::channel :${whois::logo} ${whois::tagf}Channels:${whois::textf} $channels"
+  }
 }
-
-proc whois:away { from keyword arguments } {
-	set channel $::whoischannel
-	set target $::whoistarget
-	set awaymessage [string range [join [lrange $arguments 2 end]] 1 end]
-	whois:putmsg $channel "$target is away: $awaymessage"
-	unbind RAW - 301 whois:away
+proc whois::317 {from key text} {
+  if {[regexp -- {.*\s(\d+)\s(\d+)\s\:} $text wholematch idle signon]} {
+    putserv "PRIVMSG $whois::channel :${whois::logo} ${whois::tagf}Connected:${whois::textf} \
+    [ctime $signon] ${whois::tagf}Idle:${whois::textf} [duration $idle]"
+  }
 }
-
-proc whois:channels { from keyword arguments } {
-	set channel $::whoischannel
-	set channels [string range [join [lrange $arguments 2 end]] 1 end]
-	set target $::whoistarget
-	whois:putmsg $channel "$target on $channels"
-	unbind RAW - 319 whois:channels
+proc whois::301 {from key text} {
+  if {[regexp {^.+\s[^\s]+\s\:(.*)$} $text match awaymsg]} {
+    putserv "PRIVMSG $whois::channel :${whois::logo} ${whois::tagf}Away:${whois::textf} $awaymsg"
+  }
 }
-
-proc whois:auth { from keyword arguments } {
-	set channel $::whoischannel
-	set target $::whoistarget
-	set authname [lindex [split $arguments] 2]
-	whois:putmsg $channel "$target is authed as $authname"
-	unbind RAW - 330 whois:auth
+proc whois::318 {from key text} {
+  namespace eval whois {
+    variable channel ""
+  }
+  variable whois::channel ""
 }
-
-proc whois:idle { from keyword arguments } {
-	set channel $::whoischannel
-	set target $::whoistarget
-	set idletime [lindex [split $arguments] 2]
-	set signon [lindex [split $arguments] 3]
-	whois:putmsg $channel "$target has been idle for [duration $idletime]. signon time [ctime $signon]"
-	unbind RAW - 317 whois:idle
+proc whois::307 {from key text} {
+  putserv "PRIVMSG $whois::channel :${whois::logo} ${whois::tagf}Services:${whois::textf} Registered Nick"
 }
-
-putlog "TCL Name : TCL Whois edited by $whois(owner) $whois(country) $whois(state) $whois(version) $whois(update)"
-putlog "Mailto : abah@ukhuwah.net"
-putlog "Running : Server $network"
-putlog "Loaded Status : Success ...!!!"
+proc whois::list {nick host hand chan text} {
+  if {[lsearch -exact [channel info $chan] "+${whois::command}"] != -1} {
+    namespace eval whois {
+      variable channel ""
+    }
+    variable whois::channel $chan
+    putserv "WHOIS $text"
+  }
+}
+putlog "\002*Loaded* \017\00304\002\[\00306W\003hois\00304\]\017 \002by \
+Ford_Lawnmower irc.GeekShed.net #Script-Help" 

@@ -1,41 +1,24 @@
-#################################################
-##------------------------------------------- -##
-##                                             ##
-##         ***    *******  ***   *** ******    ##
-##        *** *   ***   **  *** *** ***  ***   ##
-##       ***   *  ***   **   *****  ***  ***   ##
-##      ********* *******     ***   ***  ***   ##
-##     ***        ***    **   ***   ***  ***   ##
-##    ***         ***     **  ***   ***  ***   ##
-##   ***          ***      ** ***    ******    ##
-##---------------------------------------------##
-#################################################
-####################################
-## AuToVeRsioN.TcL v1.0 By ARYO	  ##
-## © juli 2010, edited by ARYO    ##
-## #kaliurang@linkchat.org  	  ##
-####################################
-## Notes:
-## + Memeriksa versi IRC Client dari user yang join ke channel dan menampilkannya ke channel tertentu
+###[INFO OWNER]###
+set TCL "Server Name" 
+set owner "abah" 
+set country "Indonesia"
+set state "Makassar"
+set versi "20.10"
+set update "09.08.2010"
+set mail "abah@ukhuwah.net"
 
-###################
-##[ KONFIGURASI ]##
-###################
-set av_ownchan "#Makmur" ;#Channel untuk menampilkan hasil versi
-set av_verchan { #Makmur } ;#Channel yang di versi, pisahkan dengan spasi
+###[SETUP]###
+putlog "AssaLamu`aLaikum WarahmatuLLah Please wait... loading $TCL (C) 1978 by abah..."
 
-###############
-##[ BINDING ]##
-###############
+set av_ownchan "#perisai" ;#Channel untuk menampilkan hasil versi
+set av_verchan { #medan } ;#Channel yang di versi, pisahkan dengan spasi
+
 bind pub n `autoversion list_av
 bind pub n `+autoversion add_av
 bind pub n `-autoversion del_av
 bind join * * join_versi
 bind ctcr * VERSION cek_kersi
 
-################
-##[ PROSEDUR ]##
-################
 proc join_versi {nick uhost hand chan} {
   global botnick av_verchan
   foreach x $av_verchan {
@@ -88,6 +71,8 @@ proc list_av {nick uhost hand chan arg} {
   putserv "NOTICE $nick :\002YourChan:\002\ $av_ownchan \002VersionChan:\002 $verchan"
 }
 
-####################################################################
-putlog "0,12«0,1 ARYO.TcL v1.0 (By ARYO) 0,12» LoaDeD"
-####################################################################
+###[INFO TCL]###
+putlog "TCL Name : $TCL" 
+putlog "Oleh : $owner $country $state $versi $update"
+putlog "Mailto : $mail"
+putlog "Loaded Status : Success Alhamdulillah !!!"
